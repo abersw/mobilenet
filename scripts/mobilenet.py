@@ -41,6 +41,8 @@ model = cv2.dnn.readNetFromTensorflow('/home/tomos/ros/wheelchair/catkin_ws/src/
 
 cap = cv2.VideoCapture(-1) #0 is laptop 1 is external
 
+rosimg = rospy.Subscriber("wheelchair_robot/left_camera", Image)
+
 
 # Check if the webcam is opened correctly
 if not cap.isOpened():
@@ -55,6 +57,7 @@ while True:
     
 
     
+    cv_image = bridge.imgmsg_to_cv2(rosimg, desired_encoding="passthrough")
     #success, image = rospy.Subscriber("wheelchair_robot/left_camera", Image)
     success, image = cap.read()
     if success:
