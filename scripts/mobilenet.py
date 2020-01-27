@@ -40,11 +40,11 @@ def id_class_name(class_id, classes):
 class image_converter:
 
   def __init__(self):
-    self.image_pub = rospy.Publisher("wheelchair_robot/mobilenet_image",Image, queue_size=10)
+    self.image_pub = rospy.Publisher("wheelchair_robot/mobilenet_image",Image, queue_size=10) #publish annotated image
 
     self.bridge = CvBridge()
-    self.image_sub = rospy.Subscriber("wheelchair_robot/left_camera/image_raw",Image,self.callback)
-    #self.image_sub = rospy.Subscriber("/zed_node/left_raw/image_raw_color", Image, self.callback)
+    mobilenet_src = rospy.get_param("/mobilenet_src") #get camera topic from ROS param server
+    self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
 
   def callback(self,data):
     try:

@@ -1,0 +1,8 @@
+<launch>
+<param name="mobilenet_src" type="string" value="/zed_node/left_raw/image_raw_color" />
+<!--<param name="mobilenet_src" type="string" value="/wheelchair_robot/left_camera/image_raw" />-->
+
+<node pkg="mobilenet" name="mobilenetnode" type="mobilenet.py" output="screen"> 
+  
+</node>
+</launch>
