@@ -46,11 +46,12 @@ class image_converter:
 
     self.bridge = CvBridge()
     mobilenet_src = rospy.get_param("/param/mobilenet/image_src") #get camera topic from ROS param server
+    
     self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
 
-    self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_camera",Image, queue_size=10) #publish annotated image
+    self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
 
-    self.pub_image = rospy.Publisher("/wheelchair/mobilenet/raw_image", Image, queue_size=10)
+    self.pub_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10)
     self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
     self.pub_object_confidence = rospy.Publisher("/wheelchair_robot/mobilenet/object_confidence",Float32, queue_size=10)
     self.pub_box_x = rospy.Publisher("/wheelchair_robot/mobilenet/box_x",Float32, queue_size=10)
@@ -63,6 +64,7 @@ class image_converter:
   def callback(self,data):
     try:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+      mobilenet_confidence_threshold = rospy.get_param("/param/mobilenet/confidence_threshold")
     except CvBridgeError as e:
       print(e)
 
@@ -92,7 +94,7 @@ class image_converter:
 
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
-        if confidence > .3:
+        if confidence > mobilenet_confidence_threshold:
             class_id = detection[1]
             class_name=id_class_name(class_id,classNames)
             print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
