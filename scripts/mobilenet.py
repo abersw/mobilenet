@@ -43,6 +43,11 @@ def id_class_name(class_id, classes):
 class image_converter:
 
   def __init__(self):
+
+    self.bridge = CvBridge()
+    mobilenet_src = rospy.get_param("/param/mobilenet/image_src") #get camera topic from ROS param server
+    self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
+
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_camera",Image, queue_size=10) #publish annotated image
 
     self.pub_image = rospy.Publisher("/wheelchair/mobilenet/raw_image", Image, queue_size=10)
@@ -53,9 +58,7 @@ class image_converter:
     self.pub_box_width = rospy.Publisher("/wheelchair_robot/mobilenet/box_width",Float32, queue_size=10)
     self.pub_box_height = rospy.Publisher("/wheelchair_robot/mobilenet/box_height",Float32, queue_size=10)
 
-    self.bridge = CvBridge()
-    mobilenet_src = rospy.get_param("/param/mobilenet/image_src") #get camera topic from ROS param server
-    self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
+    
 
   def callback(self,data):
     try:
@@ -85,7 +88,7 @@ class image_converter:
     model.setInput(cv2.dnn.blobFromImage(image, size=(300, 300), swapRB=True))
     output = model.forward()
 
-    class_name_array = list()
+    class_name_array = []
 
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
@@ -99,7 +102,7 @@ class image_converter:
             box_height = detection[6] * image_height
             cv2.rectangle(image, (int(box_x), int(box_y)), (int(box_width), int(box_height)), (23, 230, 210), thickness=1)
             cv2.putText(image,class_name ,(int(box_x), int(box_y+.05*image_height)),cv2.FONT_HERSHEY_SIMPLEX,(.002*image_width),(0, 0, 255))
-            #class_name_array.append(class_name)
+            class_name_array += class_name
     #cv2.imshow('image', image)
 
 
@@ -112,7 +115,7 @@ class image_converter:
       self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
 
       self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #raw image
-      #self.pub_object_name.publish(class_name_array)
+      self.pub_object_name.publish(class_name_array)
     except CvBridgeError as e:
       print(e)
 
