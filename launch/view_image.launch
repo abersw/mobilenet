@@ -1,5 +1,5 @@
 <launch>
 <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
-<remap from="image" to="/wheelchair_robot/mobilenet/annotated_camera" />
+<remap from="image" to="/wheelchair_robot/mobilenet/raw_image" />
 </node>
 </launch>
