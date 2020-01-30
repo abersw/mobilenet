@@ -9,11 +9,16 @@ import array
 from wheelchair_msgs.msg import mobilenet #import the wheelchair messages thingy
 from std_msgs.msg import String
 from std_msgs.msg import Float32
+from std_msgs.msg import MultiArrayDimension
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 model = cv2.dnn.readNetFromTensorflow('/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/frozen_inference_graph.pb',
                                         '/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/ssd_mobilenet_v2_coco_2018_03_29.pbtxt')
+
+frameCount = 0
+
+MultiArrayDimension[] = objectDetected
 
 classNames = {0: 'background',
               1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane', 6: 'bus',
@@ -51,13 +56,14 @@ class image_converter:
 
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
 
-    self.pub_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10)
-    self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
-    self.pub_object_confidence = rospy.Publisher("/wheelchair_robot/mobilenet/object_confidence",Float32, queue_size=10)
-    self.pub_box_x = rospy.Publisher("/wheelchair_robot/mobilenet/box_x",Float32, queue_size=10)
-    self.pub_box_y = rospy.Publisher("/wheelchair_robot/mobilenet/box_y",Float32, queue_size=10)
-    self.pub_box_width = rospy.Publisher("/wheelchair_robot/mobilenet/box_width",Float32, queue_size=10)
-    self.pub_box_height = rospy.Publisher("/wheelchair_robot/mobilenet/box_height",Float32, queue_size=10)
+    self.pub_detected_object = rospy.Publisher("/wheelchair_robot/mobilenet/detected_object",MultiArrayDimension, queue_size=20)
+    #self.pub_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10)
+    #self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
+    #self.pub_object_confidence = rospy.Publisher("/wheelchair_robot/mobilenet/object_confidence",Float32, queue_size=10)
+    #self.pub_box_x = rospy.Publisher("/wheelchair_robot/mobilenet/box_x",Float32, queue_size=10)
+    #self.pub_box_y = rospy.Publisher("/wheelchair_robot/mobilenet/box_y",Float32, queue_size=10)
+    #self.pub_box_width = rospy.Publisher("/wheelchair_robot/mobilenet/box_width",Float32, queue_size=10)
+    #self.pub_box_height = rospy.Publisher("/wheelchair_robot/mobilenet/box_height",Float32, queue_size=10)
 
     
 
@@ -90,7 +96,7 @@ class image_converter:
     model.setInput(cv2.dnn.blobFromImage(image, size=(300, 300), swapRB=True))
     output = model.forward()
 
-    class_name_array = []
+    
 
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
@@ -104,7 +110,9 @@ class image_converter:
             box_height = detection[6] * image_height
             cv2.rectangle(image, (int(box_x), int(box_y)), (int(box_width), int(box_height)), (23, 230, 210), thickness=1)
             cv2.putText(image,class_name ,(int(box_x), int(box_y+.05*image_height)),cv2.FONT_HERSHEY_SIMPLEX,(.002*image_width),(0, 0, 255))
-            class_name_array += class_name
+            frameCount++
+            #class_name_array += class_name
+
     #cv2.imshow('image', image)
 
 
