@@ -2,8 +2,8 @@
 from __future__ import print_function
 
 import roslib
-import sys
-import rospy
+import os, sys
+import rospy, rospkg
 import cv2
 import array
 from wheelchair_msgs.msg import mobilenet #import the wheelchair messages thingy
@@ -153,9 +153,9 @@ class image_converter:
 def foundObjectsFileWrite():
   #new section saves the varience of objects into a txt file "found-objects.txt"
     # record object type in a file - 1 file per training - overwrite when finished.
+    rospack = rospkg.RosPack()
     foundInstanceFlag = 0
-    bagOfObjects = open("/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/found-objects.txt", "w")
-
+    bagOfObjects = open(os.path.join(rospack.get_path("wheelchair_dump"), "dump", "mobilenet", "found-objects.txt"), 'w') #location of dump package
     print(objectLog) #print off raw list
     for itemInLog in objectLog: #iterate through items in log
         print(itemInLog)
