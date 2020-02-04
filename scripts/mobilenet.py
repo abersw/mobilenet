@@ -6,7 +6,7 @@ import os, sys
 import rospy, rospkg
 import cv2
 import array
-from wheelchair_msgs.msg import mobilenet #import the wheelchair messages thingy
+from wheelchair_msgs.msg import mobilenet #import the wheelchair messages files
 from std_msgs.msg import String
 from std_msgs.msg import Float32
 from std_msgs.msg import MultiArrayDimension
@@ -142,9 +142,9 @@ class image_converter:
     #cv2.waitKey(3)
 
     try:
-      self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
+      self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8")) #publish annotated image
 
-      self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #raw image
+      self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
       #self.pub_detected_object.publish(obj)
       #self.pub_object_name.publish(String(obj))
     except CvBridgeError as e:
