@@ -150,13 +150,8 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-def main(args):
-  ic = image_converter()
-  rospy.init_node('mobilenet_ROSit_2_OCV', anonymous=True)
-  try:
-    rospy.spin()
-    print("Shutting down")
-    #new section saves the varience of objects into a txt file "found-objects.txt"
+def foundObjectsFileWrite():
+  #new section saves the varience of objects into a txt file "found-objects.txt"
     # record object type in a file - 1 file per training - overwrite when finished.
     foundInstanceFlag = 0
     bagOfObjects = open("/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/found-objects.txt", "w")
@@ -171,9 +166,18 @@ def main(args):
             objectList.append(itemInLog) #append object name to array
         foundInstanceFlag = 0 #set back to 0 when finished
     print(objectList) #print off instance list array
-
     for itemInList in objectList: #iterate through instance list
         bagOfObjects.write(itemInList + "\n") #write object instance to file
+
+def main(args):
+  ic = image_converter()
+  rospy.init_node('mobilenet_ROSit_2_OCV', anonymous=True)
+  try:
+    rospy.spin()
+    print("Shutting down")
+    foundObjectsFileWrite()
+
+    
   except KeyboardInterrupt:
     print("Shutting down")
   cv2.destroyAllWindows()
