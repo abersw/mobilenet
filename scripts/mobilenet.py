@@ -13,6 +13,17 @@ from std_msgs.msg import MultiArrayDimension
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
+objectLog = [] # logs lists of objects when they are detected by MNETv2
+
+objectList = [] # list of signle items found by MNETv2
+
+objectString = "";
+
+
+
+itemInLog = ""
+itemInList = ""
+
 model = cv2.dnn.readNetFromTensorflow('/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/frozen_inference_graph.pb',
                                         '/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/ssd_mobilenet_v2_coco_2018_03_29.pbtxt')
 
@@ -61,7 +72,7 @@ class image_converter:
 
     self.pub_detected_object = rospy.Publisher("/wheelchair_robot/mobilenet/detected_object",MultiArrayDimension, queue_size=20)
     self.pub_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10)
-    #self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
+    self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
     #self.pub_object_confidence = rospy.Publisher("/wheelchair_robot/mobilenet/object_confidence",Float32, queue_size=10)
     #self.pub_box_x = rospy.Publisher("/wheelchair_robot/mobilenet/box_x",Float32, queue_size=10)
     #self.pub_box_y = rospy.Publisher("/wheelchair_robot/mobilenet/box_y",Float32, queue_size=10)
@@ -73,6 +84,7 @@ class image_converter:
   def callback(self,data):
     try:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+      obj = String()
       addFrame()
       mobilenet_confidence_threshold = rospy.get_param("/param/mobilenet/confidence_threshold")
     except CvBridgeError as e:
@@ -100,7 +112,7 @@ class image_converter:
     model.setInput(cv2.dnn.blobFromImage(image, size=(300, 300), swapRB=True))
     output = model.forward()
 
-    
+    #objectList = String()
 
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
@@ -108,6 +120,9 @@ class image_converter:
             class_id = detection[1]
             class_name=id_class_name(class_id,classNames)
             print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
+            #add object logger here
+            objectLog.append(class_name)
+
             box_x = detection[3] * image_width
             box_y = detection[4] * image_height
             box_width = detection[5] * image_width
@@ -116,6 +131,8 @@ class image_converter:
             cv2.putText(image,class_name ,(int(box_x), int(box_y+.05*image_height)),cv2.FONT_HERSHEY_SIMPLEX,(.002*image_width),(0, 0, 255))
             #class_name_array += class_name
             #frameCount = frameCount + 1
+            #objectList.join(class_name)
+    #obj = objectList
     #cv2.imshow('image', image)
 
 
@@ -128,7 +145,8 @@ class image_converter:
       self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
 
       self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #raw image
-      #self.pub_object_name.publish(class_name_array)
+      #self.pub_detected_object.publish(obj)
+      #self.pub_object_name.publish(String(obj))
     except CvBridgeError as e:
       print(e)
 
@@ -137,6 +155,25 @@ def main(args):
   rospy.init_node('mobilenet_ROSit_2_OCV', anonymous=True)
   try:
     rospy.spin()
+    print("Shutting down")
+    #new section saves the varience of objects into a txt file "found-objects.txt"
+    # record object type in a file - 1 file per training - overwrite when finished.
+    foundInstanceFlag = 0
+    bagOfObjects = open("/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/found-objects.txt", "w")
+
+    print(objectLog) #print off raw list
+    for itemInLog in objectLog: #iterate through items in log
+        print(itemInLog)
+        for itemInList in objectList: #iterate through items in found list
+            if itemInLog == itemInList: #if log item is same as found item
+                foundInstanceFlag += 1 #add 1 instance
+        if foundInstanceFlag == 0: #if we haven't found an instance of an object
+            objectList.append(itemInLog) #append object name to array
+        foundInstanceFlag = 0 #set back to 0 when finished
+    print(objectList) #print off instance list array
+
+    for itemInList in objectList: #iterate through instance list
+        bagOfObjects.write(itemInList + "\n") #write object instance to file
   except KeyboardInterrupt:
     print("Shutting down")
   cv2.destroyAllWindows()
