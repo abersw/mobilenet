@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#To do:
+#Get room name for file write
 from __future__ import print_function
 
 import roslib
@@ -65,7 +67,7 @@ class image_converter:
 
     self.bridge = CvBridge()
     mobilenet_src = rospy.get_param("/param/mobilenet/image_src") #get camera topic from ROS param server
-    
+
     self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
 
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
@@ -79,7 +81,7 @@ class image_converter:
     #self.pub_box_width = rospy.Publisher("/wheelchair_robot/mobilenet/box_width",Float32, queue_size=10)
     #self.pub_box_height = rospy.Publisher("/wheelchair_robot/mobilenet/box_height",Float32, queue_size=10)
 
-    
+
 
   def callback(self,data):
     try:
@@ -105,7 +107,7 @@ class image_converter:
     #                                      'models/ssd_mobilenet_v2_coco_2018_03_29.pbtxt')
     #image = cv2.imread("generate.jpg")
 
-    image = cv2.resize(cv_image, (0,0), fx=1.0, fy=1.0) 
+    image = cv2.resize(cv_image, (0,0), fx=1.0, fy=1.0)
 
     image_height, image_width, _ = image.shape
 
@@ -177,7 +179,7 @@ def main(args):
     print("Shutting down")
     foundObjectsFileWrite()
 
-    
+
   except KeyboardInterrupt:
     print("Shutting down")
   cv2.destroyAllWindows()
