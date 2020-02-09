@@ -14,8 +14,10 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 objectLog = [] # logs lists of objects when they are detected by MNETv2
+objectConfLog = [] # logs list of objects confidence
 
 objectList = [] # list of signle items found by MNETv2
+objectConfList = [] # list of confidence for single items
 
 objectString = "";
 
@@ -122,7 +124,7 @@ class image_converter:
             print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
             #add object logger here
             objectLog.append(class_name)
-
+            objectConfLog.append(confidence)
             box_x = detection[3] * image_width
             box_y = detection[4] * image_height
             box_width = detection[5] * image_width
@@ -153,10 +155,12 @@ class image_converter:
 def foundObjectsFileWrite():
   #new section saves the varience of objects into a txt file "found-objects.txt"
     # record object type in a file - 1 file per training - overwrite when finished.
+    roomNameParam = rospy.get_param("/wheelchair_robot/user/room_name") #get room name from user
     rospack = rospkg.RosPack()
     foundInstanceFlag = 0
-    bagOfObjects = open(os.path.join(rospack.get_path("wheelchair_dump"), "dump", "mobilenet", "found-objects.txt"), 'w') #location of dump package
+    bagOfObjects = open(os.path.join(rospack.get_path("wheelchair_dump"), "dump", "mobilenet", roomNameParam + ".objects"), 'w') #location of dump package
     print(objectLog) #print off raw list
+    posInObjectLog = 0
     for itemInLog in objectLog: #iterate through items in log
         print(itemInLog)
         for itemInList in objectList: #iterate through items in found list
@@ -164,10 +168,18 @@ def foundObjectsFileWrite():
                 foundInstanceFlag += 1 #add 1 instance
         if foundInstanceFlag == 0: #if we haven't found an instance of an object
             objectList.append(itemInLog) #append object name to array
+            objectConfList.append(objectConfLog[posInObjectLog]) # get confidence of corresponding object
         foundInstanceFlag = 0 #set back to 0 when finished
+        posInObjectLog += 1
+
     print(objectList) #print off instance list array
+    posInObjectList = 0
     for itemInList in objectList: #iterate through instance list
-        bagOfObjects.write(itemInList + "\n") #write object instance to file
+        concatToBag = itemInList + ":" + str(objectConfList[posInObjectList]) + "\n";
+        print(concatToBag)
+        bagOfObjects.write(concatToBag) #write object instance to file
+        posInObjectList += 1
+    bagOfObjects.close()
 
 def main(args):
   ic = image_converter()
