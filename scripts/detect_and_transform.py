@@ -143,11 +143,16 @@ class image_converter:
             #mobilenet.objectName.append(class_name)
             #pub_detected_objects.objectName.append(class_name)
             mobilenet_msg.object_name.append(class_name)
-            
-
+            mobilenet_msg.object_confidence.append(confidence)
+            mobilenet_msg.box_x.append(box_x)
+            mobilenet_msg.box_y.append(box_y)
+            mobilenet_msg.box_width.append(box_width)
+            mobilenet_msg.box_height.append(box_height)
             objectNoInFrame += 1
-            print("total objects in frame are " , objectNoInFrame)
             mobilenet_msg.totalObjectsInFrame = objectNoInFrame
+
+            print("total objects in frame are " , objectNoInFrame)
+            
     #obj = objectList
     #cv2.imshow('image', image)
 
