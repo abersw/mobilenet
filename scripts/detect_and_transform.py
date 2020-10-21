@@ -14,6 +14,7 @@ from std_msgs.msg import Float32
 from std_msgs.msg import MultiArrayDimension
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from time import sleep
 
 objectLog = [] # logs lists of objects when they are detected by MNETv2
 objectConfLog = [] # logs list of objects confidence
@@ -159,7 +160,7 @@ class image_converter:
 
 
 
-
+    sleep(0.1)
     #cv2.waitKey(3)
 
     try:
