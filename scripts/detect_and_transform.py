@@ -76,7 +76,7 @@ class image_converter:
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
 
     #self.pub_detected_object = rospy.Publisher("/wheelchair_robot/mobilenet/detected_object",MultiArrayDimension, queue_size=20)
-    self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_object", mobilenet, queue_size=10)
+    self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
     self.pub_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10)
     self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
     #self.pub_object_confidence = rospy.Publisher("/wheelchair_robot/mobilenet/object_confidence",Float32, queue_size=10)
