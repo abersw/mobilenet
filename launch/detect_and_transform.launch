@@ -1,5 +1,5 @@
 <launch>
-<param name="param/mobilenet/image_src" type="string" value="/zed_node/left/image_rect_color" />
+<param name="param/mobilenet/image_src" type="string" value="/zed_node/left/image_rect_color/compressed" />
 <!--<param name="param/mobilenet/image_src" type="string" value="/wheelchair_robot/left_camera/image_raw" />-->
 <!--<param name="param/mobilenet/image_src" type="string" value="/still_image_publisher/image_raw" />-->
 <param name="param/mobilenet/confidence_threshold" type="double" value="0.5" />
