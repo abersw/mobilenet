@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #To do:
 #Get room name for file write
 from __future__ import print_function
