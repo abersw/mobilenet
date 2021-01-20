@@ -22,8 +22,6 @@ objectConfLog = [] # logs list of objects confidence
 objectList = [] # list of signle items found by MNETv2
 objectConfList = [] # list of confidence for single items
 
-objectString = "";
-
 
 
 itemInLog = ""
@@ -124,6 +122,7 @@ class image_converter:
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
         if confidence > mobilenet_confidence_threshold:
+            print("confidence threshold" + str(mobilenet_confidence_threshold))
             class_id = detection[1]
             class_name=id_class_name(class_id,classNames)
             print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
