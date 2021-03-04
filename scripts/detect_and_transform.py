@@ -174,7 +174,7 @@ class image_converter:
 def foundObjectsFileWrite():
   #new section saves the varience of objects into a txt file "found-objects.txt"
     # record object type in a file - 1 file per training - overwrite when finished.
-    roomNameParam = rospy.get_param("/wheelchair_robot/user/room_name") #get room name from user
+    roomNameParam = rospy.get_param("/wheelchair_param/user/room_name") #get room name from user
     rospack = rospkg.RosPack()
     foundInstanceFlag = 0
     bagOfObjects = open(os.path.join(rospack.get_path("wheelchair_dump"), "dump", "mobilenet", roomNameParam + ".objects"), 'w') #location of dump package
