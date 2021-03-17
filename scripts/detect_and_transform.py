@@ -67,9 +67,9 @@ class image_converter:
   def __init__(self):
 
     self.bridge = CvBridge()
-    mobilenet_src = rospy.get_param("/wheelchair_param/mobilenet/image_src") #get camera topic from ROS param server
+    #mobilenet_src = rospy.get_param("/wheelchair_param/mobilenet/image_src") #get camera topic from ROS param server
 
-    self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
+    self.image_sub = rospy.Subscriber("/wheelchair_robot/sensors/left_camera", Image, self.callback) #rosparam camera source
 
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
 
@@ -89,7 +89,7 @@ class image_converter:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
       obj = String()
       addFrame()
-      mobilenet_confidence_threshold = rospy.get_param("/wheelchair_param/mobilenet/confidence_threshold")
+      mobilenet_confidence_threshold = rospy.get_param("/wheelchair_robot/param/mobilenet/confidence_threshold")
     except CvBridgeError as e:
       print(e)
 
