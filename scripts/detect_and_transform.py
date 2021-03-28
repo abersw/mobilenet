@@ -164,11 +164,12 @@ class image_converter:
     #cv2.waitKey(3)
 
     try:
-      self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8")) #publish annotated image
+      if (mobilenet_msg.totalObjectsInFrame != 0):
+        self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8")) #publish annotated image
 
-      self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
-      mobilenet_msg.header.stamp = rospy.Time.now()
-      self.pub_detected_objects.publish(mobilenet_msg)
+        self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
+        mobilenet_msg.header.stamp = rospy.Time.now()
+        self.pub_detected_objects.publish(mobilenet_msg)
     except CvBridgeError as e:
       print(e)
 
