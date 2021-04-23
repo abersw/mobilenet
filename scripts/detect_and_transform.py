@@ -142,7 +142,7 @@ class image_converter:
 
             #mobilenet.objectName.append(class_name)
             #pub_detected_objects.objectName.append(class_name)
-            if (class_name != "person") or (class_name != "dog"): #list of objects not to record in the environment
+            if (class_name != "person") and (class_name != "dog"): #list of objects not to record in the environment
               mobilenet_msg.object_name.append(class_name)
               mobilenet_msg.object_confidence.append(confidence)
               mobilenet_msg.box_x.append(box_x)
