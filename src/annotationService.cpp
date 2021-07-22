@@ -3,6 +3,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_srvs/Empty.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <sstream>
@@ -76,8 +77,32 @@ bool annotation_cb(mobilenet::Annotations::Request  &req,
          mobilenet::Annotations::Response &res)
 {
 
-requestObjectName = req.object;
-std::cout << "called" << std::endl;
+requestObjectName = req.object; //get service request
+std::cout << "called: " << requestObjectName << std::endl; //print service request
+std::string pathLocation = "/home/tomos/ros/wheelchair/catkin_ws/"; //location of dir to save to
+std::string annotationLocation = pathLocation + requestObjectName + ".jpg"; //append file name to path location
+std::cout << annotationLocation << std::endl; //print out path location
+ptr_n->setParam("/wheelchair_robot/image_saver_object_annotation/filename_format", annotationLocation); //set path location in parameter server
+std::string s;
+    if (ptr_n->getParam("/wheelchair_robot/image_saver_object_annotation/filename_format", s)) //get parameter to confirm
+    {
+      ROS_INFO("Got param: %s", s.c_str()); //print out parameter
+    }
+    else
+    {
+      ROS_ERROR("Failed to get param 'my_param'"); //couldn't retrieve parameter
+    }
+
+ros::ServiceClient client = ptr_n->serviceClient<std_srvs::Empty>("/wheelchair_robot/image_saver_object_annotation/save"); //call service with empty type
+std_srvs::Empty srv;
+if (client.call(srv))
+{
+  ROS_INFO("successfully called service"); //service successfully called
+}
+else {
+  ROS_WARN("oops"); //service failed to call
+}
+//my_package::Foo foo;
 ImageConverter ic;
 
 //ros::Subscriber sub = ptr_n->subscribe("/wheelchair_robot/mobilenet/annotated_image", 1, imageCallback);
