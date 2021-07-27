@@ -12,7 +12,9 @@ from wheelchair_msgs.msg import mobilenet #import the wheelchair messages files
 from std_msgs.msg import String
 from std_msgs.msg import Float32
 from std_msgs.msg import MultiArrayDimension
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
+from std_msgs.msg import Header
+import message_filters
 from cv_bridge import CvBridge, CvBridgeError
 from time import sleep
 
@@ -72,6 +74,7 @@ class image_converter:
     self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
 
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
+    #self.pub_annotated_image_info = rospy.Publisher("/wheelchair_robot/mobilenet/camera_info", CameraInfo, queue_size=10)
 
     #self.pub_detected_object = rospy.Publisher("/wheelchair_robot/mobilenet/detected_object",MultiArrayDimension, queue_size=20)
     self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
@@ -165,7 +168,15 @@ class image_converter:
 
     try:
       if (mobilenet_msg.totalObjectsInFrame != 0):
-        self.pub_annotated_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8")) #publish annotated image
+        self.rosimg = Image()
+        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
+        self.rosimg.header.stamp = rospy.Time.now()
+        self.pub_annotated_image.publish(self.rosimg) #publish annotated image
+        #self.annotatedCameraInfo = CameraInfo()
+        #self.annotatedCameraInfo.header.stamp = rospy.Time.now()
+        #self.annotatedCameraInfo.height = image_height
+        #self.annotatedCameraInfo.width = image_width
+        #self.pub_annotated_image_info.publish(self.annotatedCameraInfo)
 
         self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
         mobilenet_msg.header.stamp = rospy.Time.now()
