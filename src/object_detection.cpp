@@ -16,6 +16,9 @@ using namespace std;
 //using namespace cv;
 //using namespace dnn;
 
+const int DEBUG_doesPkgExist = 0;
+const int DEBUG_main = 0;
+
 ros::NodeHandle *ptr_n;
 
 std::string wheelchair_dump_loc;
@@ -24,14 +27,35 @@ std::vector<std::string> class_names;
 
 //function for printing space sizes
 void printSeparator(int spaceSize) {
-	if (spaceSize == 0) {
-		printf("--------------------------------------------\n");
-	}
-	else {
-		printf("\n");
-		printf("--------------------------------------------\n");
-		printf("\n");
-	}
+    if (spaceSize == 0) {
+        printf("--------------------------------------------\n");
+    }
+    else {
+        printf("\n");
+        printf("--------------------------------------------\n");
+        printf("\n");
+    }
+}
+
+//does the wheelchair dump package exist in the workspace?
+std::string doesPkgExist(std::string pkg_name) {
+    std::string getPkgPath;
+    if (ros::package::getPath(pkg_name) == "") {
+        cout << "FATAL:  Couldn't find package " << pkg_name << "\n";
+        cout << "FATAL:  Closing node. \n";
+        if (DEBUG_doesPkgExist) {
+            cout << getPkgPath << endl;
+        }
+        ros::shutdown();
+        exit(0);
+    }
+    else {
+        getPkgPath = ros::package::getPath(pkg_name);
+        if (DEBUG_doesPkgExist) {
+            cout << getPkgPath << endl;
+        }
+    }
+    return getPkgPath;
 }
 
 void populateClassNames() {
@@ -63,11 +87,21 @@ auto model = cv::dnn::readNetFromTensorflow(
 
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "Mobilenet_Annotations_Service");
-  ros::NodeHandle n;
-  ptr_n = &n;
-  
-  ros::spin();
+    wheelchair_dump_loc = doesPkgExist("wheelchair_dump");//check to see if dump package exists
+    std::string objects_list_loc = wheelchair_dump_loc + "/dump/object_detection/objects.txt"; //set path for dacop file (object info)
+    ros::init(argc, argv, "mobilenet_object_detection");
+    ros::NodeHandle n;
+    ptr_n = &n;
+    ros::Rate rate(10.0);
 
-  return 0;
+    while(ros::ok()) {
+
+        if (DEBUG_main) {
+            cout << "spin \n";
+        }
+        ros::spinOnce();
+        rate.sleep();
+    }
+
+    return 0;
 }
