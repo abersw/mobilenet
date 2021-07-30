@@ -138,6 +138,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/mobilenet_node.cpp)
 add_executable(annotationService src/annotationService.cpp)
+add_executable(object_detection src/object_detection.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,6 +156,7 @@ add_executable(annotationService src/annotationService.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(annotationService ${catkin_LIBRARIES})
+target_link_libraries(object_detection ${catkin_LIBRARIES})
 
 #############
 ## Install ##
