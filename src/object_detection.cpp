@@ -17,6 +17,7 @@ using namespace std;
 //using namespace dnn;
 
 const int DEBUG_doesPkgExist = 0;
+const int DEBUG_populateClassNames = 0;
 const int DEBUG_main = 0;
 
 ros::NodeHandle *ptr_n;
@@ -24,6 +25,7 @@ ros::NodeHandle *ptr_n;
 std::string wheelchair_dump_loc;
 
 std::vector<std::string> class_names;
+int total_class_names = 0;
 
 //function for printing space sizes
 void printSeparator(int spaceSize) {
@@ -58,8 +60,22 @@ std::string doesPkgExist(std::string pkg_name) {
     return getPkgPath;
 }
 
-void populateClassNames() {
-  
+void populateClassNames(std::string objects_list_loc) {
+    ifstream FILE_READER(objects_list_loc); //open file
+    int objectNumber = 0; //iterate on each object
+    if (FILE_READER.peek() == std::ifstream::traits_type::eof()) {
+        //don't do anything if next character in file is eof
+        cout << "file is empty" << endl;
+    }
+    else {
+        std::string line;
+        while (getline(FILE_READER, line)) { //go through line by line
+            //add to vector
+            class_names.push_back(line);
+            objectNumber++;
+        }
+        total_class_names = objectNumber;
+    }
 }
 /*
 classNames = {0: 'background',
@@ -89,6 +105,7 @@ auto model = cv::dnn::readNetFromTensorflow(
 int main(int argc, char **argv) {
     wheelchair_dump_loc = doesPkgExist("wheelchair_dump");//check to see if dump package exists
     std::string objects_list_loc = wheelchair_dump_loc + "/dump/object_detection/objects.txt"; //set path for dacop file (object info)
+    populateClassNames(objects_list_loc);
     ros::init(argc, argv, "mobilenet_object_detection");
     ros::NodeHandle n;
     ptr_n = &n;
