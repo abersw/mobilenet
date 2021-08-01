@@ -33,6 +33,8 @@ const int DEBUG_main = 0;
 
 ros::NodeHandle *ptr_n;
 
+std::string camera_src;
+
 std::string wheelchair_dump_loc;
 
 std::vector<std::string> class_names;
@@ -103,8 +105,9 @@ class ImageConverter {
     public:
     ImageConverter()
     : it_(nh_) {
-        image_sub_ = it_.subscribe("/camera/image_raw", 1, &ImageConverter::imageCb, this); //subscriber
-        image_pub_ = it_.advertise("/image_converter/output_video", 1);
+        nh_.getParam("/wheelchair_robot/param/left_camera", camera_src);
+        image_sub_ = it_.subscribe(camera_src, 1, &ImageConverter::imageCb, this); //subscriber
+        image_pub_ = it_.advertise("/wheelchair_robot/mobilenet/annotated_image", 1);
         cv::namedWindow(OPENCV_WINDOW);
     }
     ~ImageConverter() {
@@ -115,6 +118,8 @@ class ImageConverter {
         cv_bridge::CvImagePtr cv_ptr;
         try {
             cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+            cv_bridge::CvImage img_ptr; //pointer for cv_img to ros_img
+            sensor_msgs::Image img_msg; //create output image message
             cv::Mat cvImage = cv_ptr->image;
             int cvImageHeight = cvImage.cols;
             int cvImageWidth = cvImage.rows;
@@ -123,6 +128,24 @@ class ImageConverter {
             model.setInput(blob); //create blob from image
             cv::Mat outputImage = model.forward();
             cv::Mat detectionMat(outputImage.size[2], outputImage.size[3], CV_32F, outputImage.ptr<float>());
+
+            for (int i = 0; i < detectionMat.rows; i++){
+                int class_id = detectionMat.at<float>(i, 1);
+                float confidence = detectionMat.at<float>(i, 2);
+                if (confidence > 0.5){
+                    int box_x = static_cast<int>(detectionMat.at<float>(i, 3) * cvImage.cols);
+                    int box_y = static_cast<int>(detectionMat.at<float>(i, 4) * cvImage.rows);
+                    int box_width = static_cast<int>(detectionMat.at<float>(i, 5) * cvImage.cols - box_x);
+                    int box_height = static_cast<int>(detectionMat.at<float>(i, 6) * cvImage.rows - box_y);
+                    cv::rectangle(cvImage, cv::Point(box_x, box_y), cv::Point(box_x+box_width, box_y+box_height), cv::Scalar(255,255,255), 2);
+                    cv::putText(cvImage, class_names[class_id-1].c_str(), cv::Point(box_x, box_y-5), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0,255,255), 1);
+                    cv::imshow("image", cvImage);
+                    //image_pub_.publish(cvImage->toImageMsg());
+                    cv::waitKey(0);
+                    cv::destroyAllWindows();
+                }
+            }
+
         }
         catch (cv_bridge::Exception& e) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -136,9 +159,6 @@ int main(int argc, char **argv) {
     std::string objects_list_loc = wheelchair_dump_loc + "/dump/object_detection/objects.txt"; //set path for dacop file (object info)
     populateClassNames(objects_list_loc);
     ros::init(argc, argv, "mobilenet_object_detection");
-    ros::NodeHandle n;
-    ptr_n = &n;
-    ros::Rate rate(10.0);
 
     ImageConverter ic;
     ros::spin();
