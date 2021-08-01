@@ -93,8 +93,34 @@ auto model = cv::dnn::readNetFromTensorflow(
 "/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/ssd_mobilenet_v2_coco_2018_03_29.pbtxt");
 
 class ImageConverter {
-    //do stuff
-}
+    ros::NodeHandle nh_;
+    image_transport::ImageTransport it_;
+    image_transport::Subscriber image_sub_;
+    image_transport::Publisher image_pub_;
+
+    public:
+    ImageConverter()
+    : it_(nh_) {
+        image_sub_ = it_.subscribe("/camera/image_raw", 1, &ImageConverter::imageCb, this); //subscriber
+        image_pub_ = it_.advertise("/image_converter/output_video", 1);
+        //cv::namedWindow(OPENCV_WINDOW);
+    }
+    ~ImageConverter() {
+        //cv::destroyWindow(OPENCV_WINDOW);
+    }
+
+    void imageCb(const sensor_msgs::ImageConstPtr& msg) {
+        cv_bridge::CvImagePtr cv_ptr;
+        try {
+            cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+            cv::Mat cvImage = cv_ptr->image;
+        }
+        catch (cv_bridge::Exception& e) {
+            ROS_ERROR("cv_bridge exception: %s", e.what());
+            return;
+        }
+    }
+};
 
 int main(int argc, char **argv) {
     wheelchair_dump_loc = doesPkgExist("wheelchair_dump");//check to see if dump package exists
@@ -105,14 +131,8 @@ int main(int argc, char **argv) {
     ptr_n = &n;
     ros::Rate rate(10.0);
 
-    while(ros::ok()) {
-
-        if (DEBUG_main) {
-            cout << "spin \n";
-        }
-        ros::spinOnce();
-        rate.sleep();
-    }
+    ImageConverter ic;
+    ros::spin();
 
     return 0;
 }
