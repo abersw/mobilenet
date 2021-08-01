@@ -9,6 +9,8 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include "ros/package.h" //find ROS packages, needs roslib dependency
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/dnn.hpp>
 #include <opencv2/dnn/all_layers.hpp>
@@ -72,7 +74,8 @@ void populateClassNames(std::string objects_list_loc) {
     int objectNumber = 0; //iterate on each object
     if (FILE_READER.peek() == std::ifstream::traits_type::eof()) {
         //don't do anything if next character in file is eof
-        cout << "file is empty" << endl;
+        cout << "class name list is empty, closing node" << endl;
+		exit(0); //close down node
     }
     else {
         std::string line;
@@ -89,6 +92,9 @@ auto model = cv::dnn::readNetFromTensorflow(
 "/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/frozen_inference_graph.pb", 
 "/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/ssd_mobilenet_v2_coco_2018_03_29.pbtxt");
 
+class ImageConverter {
+    //do stuff
+}
 
 int main(int argc, char **argv) {
     wheelchair_dump_loc = doesPkgExist("wheelchair_dump");//check to see if dump package exists
