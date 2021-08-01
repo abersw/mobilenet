@@ -25,6 +25,8 @@ using namespace std;
 //using namespace cv;
 //using namespace dnn;
 
+static const std::string OPENCV_WINDOW = "Image window";
+
 const int DEBUG_doesPkgExist = 0;
 const int DEBUG_populateClassNames = 0;
 const int DEBUG_main = 0;
@@ -103,10 +105,10 @@ class ImageConverter {
     : it_(nh_) {
         image_sub_ = it_.subscribe("/camera/image_raw", 1, &ImageConverter::imageCb, this); //subscriber
         image_pub_ = it_.advertise("/image_converter/output_video", 1);
-        //cv::namedWindow(OPENCV_WINDOW);
+        cv::namedWindow(OPENCV_WINDOW);
     }
     ~ImageConverter() {
-        //cv::destroyWindow(OPENCV_WINDOW);
+        cv::destroyWindow(OPENCV_WINDOW);
     }
 
     void imageCb(const sensor_msgs::ImageConstPtr& msg) {
@@ -114,6 +116,13 @@ class ImageConverter {
         try {
             cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
             cv::Mat cvImage = cv_ptr->image;
+            int cvImageHeight = cvImage.cols;
+            int cvImageWidth = cvImage.rows;
+
+            cv::Mat blob = cv::dnn::blobFromImage(cvImage, 1.0, cv::Size(300, 300), cv::Scalar(127.5, 127.5, 127.5), true, false);
+            model.setInput(blob); //create blob from image
+            cv::Mat outputImage = model.forward();
+            cv::Mat detectionMat(outputImage.size[2], outputImage.size[3], CV_32F, outputImage.ptr<float>());
         }
         catch (cv_bridge::Exception& e) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
