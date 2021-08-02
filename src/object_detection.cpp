@@ -106,7 +106,7 @@ class ImageConverter {
     ImageConverter()
     : it_(nh_) {
         nh_.getParam("/wheelchair_robot/param/left_camera", camera_src);
-        image_sub_ = it_.subscribe(camera_src, 1, &ImageConverter::imageCb, this); //subscriber
+        image_sub_ = it_.subscribe("/kitchen_image_publisher/image_raw", 1, &ImageConverter::imageCb, this); //subscriber
         image_pub_ = it_.advertise("/wheelchair_robot/mobilenet/annotated_image", 1);
         cv::namedWindow(OPENCV_WINDOW);
     }
@@ -145,7 +145,6 @@ class ImageConverter {
                     cv::destroyAllWindows();
                 }
             }
-
         }
         catch (cv_bridge::Exception& e) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
