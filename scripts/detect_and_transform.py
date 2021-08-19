@@ -163,7 +163,7 @@ class image_converter:
 
 
 
-    sleep(0.1)
+    #sleep(0.1)
     #cv2.waitKey(3)
 
     try:
