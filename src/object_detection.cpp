@@ -23,9 +23,10 @@ using namespace std;
 
 static const std::string OPENCV_WINDOW = "Image window";
 
-const int DEBUG_doesPkgExist = 0;
 const int DEBUG_populateClassNames = 0;
 const int DEBUG_main = 0;
+
+TofToolBox *tofToolBox;
 
 ros::NodeHandle *ptr_n;
 
@@ -35,39 +36,6 @@ std::string wheelchair_dump_loc;
 
 std::vector<std::string> class_names;
 int total_class_names = 0;
-
-//function for printing space sizes
-void printSeparator(int spaceSize) {
-    if (spaceSize == 0) {
-        printf("--------------------------------------------\n");
-    }
-    else {
-        printf("\n");
-        printf("--------------------------------------------\n");
-        printf("\n");
-    }
-}
-
-//does the wheelchair dump package exist in the workspace?
-std::string doesPkgExist(std::string pkg_name) {
-    std::string getPkgPath;
-    if (ros::package::getPath(pkg_name) == "") {
-        cout << "FATAL:  Couldn't find package " << pkg_name << "\n";
-        cout << "FATAL:  Closing node. \n";
-        if (DEBUG_doesPkgExist) {
-            cout << getPkgPath << endl;
-        }
-        ros::shutdown();
-        exit(0);
-    }
-    else {
-        getPkgPath = ros::package::getPath(pkg_name);
-        if (DEBUG_doesPkgExist) {
-            cout << getPkgPath << endl;
-        }
-    }
-    return getPkgPath;
-}
 
 void populateClassNames(std::string objects_list_loc) {
     ifstream FILE_READER(objects_list_loc); //open file
@@ -150,7 +118,10 @@ class ImageConverter {
 };
 
 int main(int argc, char **argv) {
-    wheelchair_dump_loc = doesPkgExist("wheelchair_dump");//check to see if dump package exists
+    TofToolBox tofToolBox_local;
+    tofToolBox = &tofToolBox_local;
+
+    wheelchair_dump_loc = tofToolBox->doesPkgExist("wheelchair_dump");//check to see if dump package exists
     std::string objects_list_loc = wheelchair_dump_loc + "/dump/object_detection/objects.txt"; //set path for dacop file (object info)
     populateClassNames(objects_list_loc);
     ros::init(argc, argv, "mobilenet_object_detection");
