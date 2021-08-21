@@ -5,23 +5,17 @@
  * Status: pre-Alpha
 */
 
-//#include "tof_tool/tof_tool_box.h"
+#include "tof_tool/tof_tool_box.h"
 
-#include <ros/ros.h>
 #include <image_transport/image_transport.h>
+
 #include <cv_bridge/cv_bridge.h>
-#include "ros/package.h" //find ROS packages, needs roslib dependency
+
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/dnn.hpp>
 #include <opencv2/dnn/all_layers.hpp>
-#include <sstream>
-#include <fstream>
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 using namespace std;
 //using namespace cv;
