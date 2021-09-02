@@ -168,6 +168,9 @@ class image_converter:
 
     try:
       if (mobilenet_msg.totalObjectsInFrame != 0):
+        mobilenet_msg.header.stamp = rospy.Time.now()
+        self.pub_detected_objects.publish(mobilenet_msg)
+
         self.rosimg = Image()
         self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
         self.rosimg.header.stamp = rospy.Time.now()
@@ -179,8 +182,6 @@ class image_converter:
         #self.pub_annotated_image_info.publish(self.annotatedCameraInfo)
 
         #self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
-        mobilenet_msg.header.stamp = rospy.Time.now()
-        self.pub_detected_objects.publish(mobilenet_msg)
     except CvBridgeError as e:
       print(e)
 
