@@ -32,6 +32,9 @@ itemInList = ""
 model = cv2.dnn.readNetFromTensorflow('/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/frozen_inference_graph.pb',
                                         '/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/ssd_mobilenet_v2_coco_2018_03_29.pbtxt')
 
+#model = cv2.dnn.readNetFromTensorflow('/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/resnet/frozen_inference_graph.pb',
+#                                      '/home/tomos/ros/wheelchair/catkin_ws/src/mobilenet/scripts/models/resnet/faster_rcnn_resnet50_coco_2018_01_28.pbtxt')
+
 frameCount = 0
 
 def addFrame():
@@ -127,7 +130,7 @@ class image_converter:
         if confidence > mobilenet_confidence_threshold:
             #print("confidence threshold" + str(mobilenet_confidence_threshold))
             class_id = detection[1]
-            class_name=id_class_name(class_id,classNames)
+            class_name=id_class_name(class_id,classNames) #add +1 to class_id for fast-resnet
             print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
             #add object logger here
             #objectLog.append(class_name)
