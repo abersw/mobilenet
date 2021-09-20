@@ -137,8 +137,10 @@ class image_converter:
             box_y = detection[4] * image_height
             box_width = detection[5] * image_width
             box_height = detection[6] * image_height
-            cv2.rectangle(image, (int(box_x), int(box_y)), (int(box_width), int(box_height)), (23, 230, 210), thickness=1)
-            cv2.putText(image,class_name ,(int(box_x), int(box_y+.05*image_height)),cv2.FONT_HERSHEY_SIMPLEX,(.002*image_width),(0, 0, 255))
+
+            label = "{}: {:.2f}".format(class_name, confidence)
+            cv2.rectangle(image, (int(box_x), int(box_y)), (int(box_width), int(box_height)), (23, 230, 210), 2)
+            cv2.putText(image,label ,(int(box_x), int(box_y+.02*image_height)),cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 250), 2)
             #class_name_array += class_name
             #frameCount = frameCount + 1
             #objectList.join(class_name)
@@ -182,8 +184,14 @@ class image_converter:
         #self.pub_annotated_image_info.publish(self.annotatedCameraInfo)
 
         #self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
+      else:
+        self.rosimg = Image()
+        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
+        self.rosimg.header.stamp = rospy.Time.now()
+        self.pub_annotated_image.publish(self.rosimg) #publish annotated image
+
     except CvBridgeError as e:
-      print(e)
+        print(e)
 
 def foundObjectsFileWrite():
   #new section saves the varience of objects into a txt file "found-objects.txt"
