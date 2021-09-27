@@ -84,7 +84,7 @@ class image_converter:
     self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
 
 
-  def callback(self,data):
+  def callback(self, data, ros_cinfo):
     try:
       cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
       obj = String()
@@ -171,21 +171,18 @@ class image_converter:
         self.pub_detected_objects.publish(mobilenet_msg)
 
         self.rosimg = Image()
-        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
         self.rosimg.header.stamp = rospy.Time.now()
+        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
+        self.rosimg.header.frame_id = "zed_left_camera_optical_frame"
         self.pub_annotated_image.publish(self.rosimg) #publish annotated image
-        #self.annotatedCameraInfo = CameraInfo()
-        #self.annotatedCameraInfo.header.stamp = rospy.Time.now()
-        #self.annotatedCameraInfo.height = image_height
-        #self.annotatedCameraInfo.width = image_width
-        #self.pub_annotated_image_info.publish(self.annotatedCameraInfo)
-
-        #self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8")) #publish raw image
+        self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
       else:
         self.rosimg = Image()
-        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
         self.rosimg.header.stamp = rospy.Time.now()
+        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
+        self.rosimg.header.frame_id = "zed_left_camera_optical_frame"
         self.pub_annotated_image.publish(self.rosimg) #publish annotated image
+        self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
 
     except CvBridgeError as e:
         print(e)
