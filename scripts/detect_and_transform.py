@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-#To do:
-#Get room name for file write
 from __future__ import print_function
 
 import roslib
@@ -70,24 +68,20 @@ def id_class_name(class_id, classes):
 class image_converter:
 
   def __init__(self):
+    rospy.init_node('mobilenet_ROSit_2_OCV', anonymous=True)
 
     self.bridge = CvBridge()
     mobilenet_src = rospy.get_param("/wheelchair_robot/param/left_camera") #get camera topic from ROS param server
+    mobilenet_src_info = rospy.get_param("/wheelchair_robot/param/left_camera_info") #get camera info topic from ROS param server
+    self.image_sub = message_filters.Subscriber(mobilenet_src, Image)
+    self.info_sub = message_filters.Subscriber(mobilenet_src_info, CameraInfo)
 
-    self.image_sub = rospy.Subscriber(mobilenet_src, Image, self.callback) #rosparam camera source
+    ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub], 10)
+    ts.registerCallback(self.callback)
 
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
-    #self.pub_annotated_image_info = rospy.Publisher("/wheelchair_robot/mobilenet/camera_info", CameraInfo, queue_size=10)
-
-    #self.pub_detected_object = rospy.Publisher("/wheelchair_robot/mobilenet/detected_object",MultiArrayDimension, queue_size=20)
+    self.pub_annotated_image_info = rospy.Publisher("/wheelchair_robot/mobilenet/camera_info", CameraInfo, queue_size=10)
     self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
-    #self.pub_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10)
-    self.pub_object_name = rospy.Publisher("/wheelchair_robot/mobilenet/object_name",String, queue_size=10)
-    #self.pub_object_confidence = rospy.Publisher("/wheelchair_robot/mobilenet/object_confidence",Float32, queue_size=10)
-    #self.pub_box_x = rospy.Publisher("/wheelchair_robot/mobilenet/box_x",Float32, queue_size=10)
-    #self.pub_box_y = rospy.Publisher("/wheelchair_robot/mobilenet/box_y",Float32, queue_size=10)
-    #self.pub_box_width = rospy.Publisher("/wheelchair_robot/mobilenet/box_width",Float32, queue_size=10)
-    #self.pub_box_height = rospy.Publisher("/wheelchair_robot/mobilenet/box_height",Float32, queue_size=10)
 
 
   def callback(self,data):
