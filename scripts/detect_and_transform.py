@@ -84,6 +84,7 @@ class image_converter:
     self.pub_annotated_image_info = rospy.Publisher("/wheelchair_robot/mobilenet/camera_info", CameraInfo, queue_size=10)
     self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
     self.pub_labelimg_objects = rospy.Publisher("/wheelchair_robot/mobilenet/labelimg", annotatedObjects, queue_size=10) #publisher for labelimg
+    self.pub_raw_image = rospy.Publisher("/wheelchair_robot/mobilenet/raw_image", Image, queue_size=10) #publisher for unannotated images
 
 
   def callback(self, data, ros_cinfo):
@@ -192,6 +193,11 @@ class image_converter:
         self.rosimgannotated.header.frame_id = "zed_left_camera_optical_frame"
         self.pub_annotated_image.publish(self.rosimgannotated) #publish annotated image
         self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
+        self.rosimgraw = Image()
+        self.rosimgraw.header.stamp = rospy.Time.now()
+        self.rosimgraw = data
+        self.rosimgraw.header.frame_id = "zed_left_camera_optical_frame"
+        self.pub_raw_image.publish(self.rosimgraw)
       else:
         self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
         self.rosimgannotated = Image()
@@ -200,6 +206,11 @@ class image_converter:
         self.rosimgannotated.header.frame_id = "zed_left_camera_optical_frame"
         self.pub_annotated_image.publish(self.rosimgannotated) #publish annotated image
         self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
+        self.rosimgraw = Image()
+        self.rosimgraw.header.stamp = rospy.Time.now()
+        self.rosimgraw = data
+        self.rosimgraw.header.frame_id = "zed_left_camera_optical_frame"
+        self.pub_raw_image.publish(self.rosimgraw)
 
     except CvBridgeError as e:
         print(e)
