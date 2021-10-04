@@ -83,7 +83,7 @@ class image_converter:
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
     self.pub_annotated_image_info = rospy.Publisher("/wheelchair_robot/mobilenet/camera_info", CameraInfo, queue_size=10)
     self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
-    self.pub_labelimg_objects = rospy.Publisher("/wheelchair_robot/mobilenet/labelimg", annotatedObjects, queue_size=10) #piblisher for labelimg
+    self.pub_labelimg_objects = rospy.Publisher("/wheelchair_robot/mobilenet/labelimg", annotatedObjects, queue_size=10) #publisher for labelimg
 
 
   def callback(self, data, ros_cinfo):
@@ -186,19 +186,19 @@ class image_converter:
         self.pub_detected_objects.publish(mobilenet_msg)
         self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
 
-        self.rosimg = Image()
-        self.rosimg.header.stamp = rospy.Time.now()
-        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
-        self.rosimg.header.frame_id = "zed_left_camera_optical_frame"
-        self.pub_annotated_image.publish(self.rosimg) #publish annotated image
+        self.rosimgannotated = Image()
+        self.rosimgannotated.header.stamp = rospy.Time.now()
+        self.rosimgannotated = self.bridge.cv2_to_imgmsg(image, "bgr8")
+        self.rosimgannotated.header.frame_id = "zed_left_camera_optical_frame"
+        self.pub_annotated_image.publish(self.rosimgannotated) #publish annotated image
         self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
       else:
         self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
-        self.rosimg = Image()
-        self.rosimg.header.stamp = rospy.Time.now()
-        self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
-        self.rosimg.header.frame_id = "zed_left_camera_optical_frame"
-        self.pub_annotated_image.publish(self.rosimg) #publish annotated image
+        self.rosimgannotated = Image()
+        self.rosimgannotated.header.stamp = rospy.Time.now()
+        self.rosimgannotated = self.bridge.cv2_to_imgmsg(image, "bgr8")
+        self.rosimgannotated.header.frame_id = "zed_left_camera_optical_frame"
+        self.pub_annotated_image.publish(self.rosimgannotated) #publish annotated image
         self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
 
     except CvBridgeError as e:
