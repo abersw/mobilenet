@@ -7,6 +7,7 @@ import rospy, rospkg
 import cv2
 import array
 from wheelchair_msgs.msg import mobilenet #import the wheelchair messages files
+from rostolabelimg.msg import annotatedObjects
 from std_msgs.msg import String
 from std_msgs.msg import Float32
 from std_msgs.msg import MultiArrayDimension
@@ -68,7 +69,7 @@ def id_class_name(class_id, classes):
 class image_converter:
 
   def __init__(self):
-    rospy.init_node('mobilenet_ROSit_2_OCV', anonymous=True)
+    rospy.init_node('mobilenet', anonymous=False)
 
     self.bridge = CvBridge()
     mobilenet_src = rospy.get_param("/wheelchair_robot/param/left_camera") #get camera topic from ROS param server
@@ -82,6 +83,7 @@ class image_converter:
     self.pub_annotated_image = rospy.Publisher("/wheelchair_robot/mobilenet/annotated_image",Image, queue_size=10) #publish annotated image
     self.pub_annotated_image_info = rospy.Publisher("/wheelchair_robot/mobilenet/camera_info", CameraInfo, queue_size=10)
     self.pub_detected_objects = rospy.Publisher("/wheelchair_robot/mobilenet/detected_objects", mobilenet, queue_size=10)
+    self.pub_labelimg_objects = rospy.Publisher("/wheelchair_robot/mobilenet/labelimg", annotatedObjects, queue_size=10) #piblisher for labelimg
 
 
   def callback(self, data, ros_cinfo):
@@ -116,6 +118,7 @@ class image_converter:
     output = model.forward()
 
     mobilenet_msg = mobilenet()
+    labelimg_msg = annotatedObjects() #labelimg var
 
     #objectList = String()
     objectNoInFrame = 0
@@ -154,6 +157,18 @@ class image_converter:
               objectNoInFrame += 1
               mobilenet_msg.totalObjectsInFrame = objectNoInFrame
 
+              #labelimg message
+              labelimg_msg.header.stamp = rospy.Time.now()
+              labelimg_msg.name.append(class_name)
+              labelimg_msg.pose.append("Unspecified")
+              labelimg_msg.truncated.append(0)
+              labelimg_msg.difficult.append(0)
+              labelimg_msg.xmin.append(box_x)
+              labelimg_msg.ymin.append(box_y)
+              labelimg_msg.xmax.append(box_width)
+              labelimg_msg.ymax.append(box_height)
+              labelimg_msg.totalObjectsInFrame = objectNoInFrame
+
             print("total objects in frame are " , objectNoInFrame)
             
     #obj = objectList
@@ -169,6 +184,7 @@ class image_converter:
       if (mobilenet_msg.totalObjectsInFrame != 0):
         mobilenet_msg.header.stamp = rospy.Time.now()
         self.pub_detected_objects.publish(mobilenet_msg)
+        self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
 
         self.rosimg = Image()
         self.rosimg.header.stamp = rospy.Time.now()
@@ -177,6 +193,7 @@ class image_converter:
         self.pub_annotated_image.publish(self.rosimg) #publish annotated image
         self.pub_annotated_image_info.publish(ros_cinfo) #publish annotated image camera info
       else:
+        self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
         self.rosimg = Image()
         self.rosimg.header.stamp = rospy.Time.now()
         self.rosimg = self.bridge.cv2_to_imgmsg(image, "bgr8")
@@ -218,7 +235,7 @@ def foundObjectsFileWrite():
 
 def main(args):
   ic = image_converter()
-  rospy.init_node('mobilenet_ROSit_2_OCV', anonymous=True)
+  rospy.init_node('mobilenet', anonymous=False)
   try:
     rospy.spin()
     print("Shutting down")
