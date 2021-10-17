@@ -7,7 +7,6 @@ import rospy, rospkg
 import cv2
 import array
 from wheelchair_msgs.msg import mobilenet #import the wheelchair messages files
-from rostolabelimg.msg import annotatedObjects
 from std_msgs.msg import String
 from std_msgs.msg import Float32
 from std_msgs.msg import MultiArrayDimension
@@ -119,7 +118,6 @@ class image_converter:
     output = model.forward()
 
     mobilenet_msg = mobilenet()
-    labelimg_msg = annotatedObjects() #labelimg var
 
     #objectList = String()
     objectNoInFrame = 0
@@ -158,18 +156,6 @@ class image_converter:
               objectNoInFrame += 1
               mobilenet_msg.totalObjectsInFrame = objectNoInFrame
 
-              #labelimg message
-              labelimg_msg.header.stamp = rospy.Time.now()
-              labelimg_msg.name.append(class_name)
-              labelimg_msg.pose.append("Unspecified")
-              labelimg_msg.truncated.append(0)
-              labelimg_msg.difficult.append(0)
-              labelimg_msg.xmin.append(box_x)
-              labelimg_msg.ymin.append(box_y)
-              labelimg_msg.xmax.append(box_width)
-              labelimg_msg.ymax.append(box_height)
-              labelimg_msg.totalObjectsInFrame = objectNoInFrame
-
             print("total objects in frame are " , objectNoInFrame)
             
     #obj = objectList
@@ -185,7 +171,6 @@ class image_converter:
       if (mobilenet_msg.totalObjectsInFrame != 0):
         mobilenet_msg.header.stamp = rospy.Time.now()
         self.pub_detected_objects.publish(mobilenet_msg)
-        self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
 
         self.rosimgannotated = Image()
         self.rosimgannotated.header.stamp = rospy.Time.now()
@@ -199,7 +184,6 @@ class image_converter:
         self.rosimgraw.header.frame_id = "zed_left_camera_optical_frame"
         self.pub_raw_image.publish(self.rosimgraw)
       else:
-        self.pub_labelimg_objects.publish(labelimg_msg) #publish labelimg
         self.rosimgannotated = Image()
         self.rosimgannotated.header.stamp = rospy.Time.now()
         self.rosimgannotated = self.bridge.cv2_to_imgmsg(image, "bgr8")
