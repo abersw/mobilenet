@@ -165,8 +165,8 @@ class image_converter:
 
     try:
       if (mobilenet_msg.totalObjectsInFrame != 0):
-        #mobilenet_msg.header.stamp = rospy.Time.now()
-        mobilenet_msg.header.stamp = data.header.stamp
+        mobilenet_msg.header.stamp = rospy.Time.now()
+        mobilenet_msg.camera_timestamp = data.header.stamp
         self.pub_detected_objects.publish(mobilenet_msg)
 
         self.rosimgannotated = Image()
