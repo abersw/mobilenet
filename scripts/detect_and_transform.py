@@ -19,7 +19,8 @@ objectConfLog = [] # logs list of objects confidence
 objectList = [] # list of signle items found by MNETv2
 objectConfList = [] # list of confidence for single items
 
-
+DEBUG_printObjectDetected = 0
+DEBUG_noObjectsInFrame = 0
 
 itemInLog = ""
 itemInList = ""
@@ -123,7 +124,8 @@ class image_converter:
             #print("confidence threshold" + str(mobilenet_confidence_threshold))
             class_id = detection[1]
             class_name=id_class_name(class_id,classNames) #add +1 to class_id for fast-resnet
-            print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
+            if DEBUG_printObjectDetected:
+              print(str(str(class_id) + " " + str(detection[2])  + " " + class_name))
             #add object logger here
             #objectLog.append(class_name)
             #objectConfLog.append(confidence)
@@ -152,7 +154,8 @@ class image_converter:
               objectNoInFrame += 1
               mobilenet_msg.totalObjectsInFrame = objectNoInFrame
 
-            print("total objects in frame are " , objectNoInFrame)
+            if DEBUG_noObjectsInFrame:
+              print("total objects in frame are " , objectNoInFrame)
             
     #obj = objectList
     #cv2.imshow('image', image)
