@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>mobilenet</name>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
   <description>Version Name: Majestic Maidenhair - The wheelchair mobilenet package to detect household objects using DNN using mobilenetV2 architecture, trained on the COCO dataset.</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
